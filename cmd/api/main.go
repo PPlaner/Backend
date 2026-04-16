@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/PPlaner/Backend/internal/auth"
 	"github.com/PPlaner/Backend/internal/config"
 	"github.com/PPlaner/Backend/internal/database"
 	"github.com/gin-gonic/gin"
@@ -22,14 +24,15 @@ func main() {
 	// 2. Підключення до БД
 	db, err := database.Connect(cfg.DB)
 	if err != nil {
-		fmt.Printf("Warning: Database not connected: %v\n", err)
+		panic(fmt.Sprintf("failed to connect to database: %v", err))
 	}
-	defer func(db *sql.DB) {
-		err := db.Close()
-		if err != nil {
 
+	defer func(db *sql.DB) {
+		if db != nil {
+			_ = db.Close()
 		}
 	}(db)
+
 	fmt.Println("Connected to database")
 
 	// 3. Ініціалізація HTTP-сервера
@@ -43,18 +46,23 @@ func main() {
 		})
 	})
 
+	userRepo := auth.NewUserRepo(db)
+	refreshTokenRepo := auth.NewRefreshTokenRepo(db)
+
+	authService := auth.NewAuthService(
+		userRepo,
+		refreshTokenRepo,
+		"secret-key",
+		15*time.Minute,
+		7*24*time.Hour,
+	)
+
+	authHandler := auth.NewHandler(authService)
 	// Група API v1 згідно зі специфікацією
 	v1 := r.Group("/api/v1")
 	{
-		auth := v1.Group("/auth")
-		{
-			auth.POST("/register", func(c *gin.Context) {
-				c.JSON(http.StatusNotImplemented, gin.H{"error": "not implemented"})
-			})
-			auth.POST("/login", func(c *gin.Context) {
-				c.JSON(http.StatusNotImplemented, gin.H{"error": "not implemented"})
-			})
-		}
+		authGroup := v1.Group("/auth")
+		auth.RegisterRoutes(authGroup, authHandler)
 	}
 
 	// 4. Запуск сервера
