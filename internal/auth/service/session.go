@@ -1,23 +1,24 @@
-package auth
+package service
 
 import (
 	"time"
 
+	"github.com/PPlaner/Backend/internal/auth/utils"
 	"github.com/PPlaner/Backend/internal/models"
 )
 
 func (s *AuthService) issueTokens(userID int) (string, string, error) {
-	accessToken, err := GenerateAccessToken(userID, s.jwtSecret, s.accessTokenTTL)
+	accessToken, err := utils.GenerateAccessToken(userID, s.jwtSecret, s.accessTokenTTL)
 	if err != nil {
 		return "", "", err
 	}
 
-	refreshToken, err := GenerateRefreshToken()
+	refreshToken, err := utils.GenerateRefreshToken()
 	if err != nil {
 		return "", "", err
 	}
 
-	tokenHash := HashToken(refreshToken)
+	tokenHash := utils.HashToken(refreshToken)
 
 	session := &models.RefreshToken{
 		UserID:    userID,

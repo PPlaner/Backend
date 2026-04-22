@@ -1,17 +1,18 @@
-package auth
+package handler
 
 import (
 	"net/http"
 
+	"github.com/PPlaner/Backend/internal/auth/service"
 	"github.com/PPlaner/Backend/internal/dto"
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
-	authService *AuthService
+	authService *service.AuthService
 }
 
-func NewHandler(authService *AuthService) *Handler {
+func NewHandler(authService *service.AuthService) *Handler {
 	return &Handler{
 		authService: authService,
 	}
@@ -29,7 +30,7 @@ func (h *Handler) Register(c *gin.Context) {
 
 	accessToken, refreshToken, err := h.authService.Register(req.Email, req.Password)
 	if err != nil {
-		if err == ErrUserAlreadyExists {
+		if err == service.ErrUserAlreadyExists {
 			c.JSON(http.StatusConflict, dto.MessageResponse{
 				Message: err.Error(),
 			})
@@ -61,7 +62,7 @@ func (h *Handler) Login(c *gin.Context) {
 
 	accessToken, refreshToken, err := h.authService.Login(req.Email, req.Password)
 	if err != nil {
-		if err == ErrInvalidCredentials {
+		if err == service.ErrInvalidCredentials {
 			c.JSON(http.StatusUnauthorized, dto.MessageResponse{
 				Message: err.Error(),
 			})

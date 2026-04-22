@@ -1,20 +1,22 @@
-package auth
+package service
 
 import (
 	"time"
+
+	"github.com/PPlaner/Backend/internal/auth/repository"
 )
 
 type AuthService struct {
-	userRepo         UserRepository
-	refreshTokenRepo RefreshTokenRepository
+	userRepo         repository.UserRepository
+	refreshTokenRepo repository.RefreshTokenRepository
 	jwtSecret        string
 	accessTokenTTL   time.Duration
 	refreshTokenTTL  time.Duration
 }
 
 func NewAuthService(
-	userRepo UserRepository,
-	refreshTokenRepo RefreshTokenRepository,
+	userRepo repository.UserRepository,
+	refreshTokenRepo repository.RefreshTokenRepository,
 	jwtSecret string,
 	accessTokenTTL time.Duration,
 	refreshTokenTTL time.Duration,

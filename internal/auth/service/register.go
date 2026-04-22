@@ -1,8 +1,9 @@
-package auth
+package service
 
 import (
 	"errors"
 
+	"github.com/PPlaner/Backend/internal/auth/utils"
 	"github.com/PPlaner/Backend/internal/models"
 )
 
@@ -18,7 +19,7 @@ func (s *AuthService) Register(email, password string) (string, string, error) {
 		return "", "", ErrUserAlreadyExists
 	}
 
-	passwordHash, err := HashPassword(password)
+	passwordHash, err := utils.HashPassword(password)
 	if err != nil {
 		return "", "", err
 	}

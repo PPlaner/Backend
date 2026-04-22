@@ -6,7 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/PPlaner/Backend/internal/auth"
+	"github.com/PPlaner/Backend/internal/auth/handler"
+	"github.com/PPlaner/Backend/internal/auth/middleware"
+	"github.com/PPlaner/Backend/internal/auth/repository"
+	"github.com/PPlaner/Backend/internal/auth/service"
 	"github.com/PPlaner/Backend/internal/config"
 	"github.com/PPlaner/Backend/internal/database"
 	"github.com/gin-gonic/gin"
@@ -46,10 +49,10 @@ func main() {
 		})
 	})
 
-	userRepo := auth.NewUserRepo(db)
-	refreshTokenRepo := auth.NewRefreshTokenRepo(db)
+	userRepo := repository.NewUserRepo(db)
+	refreshTokenRepo := repository.NewRefreshTokenRepo(db)
 
-	authService := auth.NewAuthService(
+	authService := service.NewAuthService(
 		userRepo,
 		refreshTokenRepo,
 		"secret-key",
@@ -57,14 +60,25 @@ func main() {
 		7*24*time.Hour,
 	)
 
-	authHandler := auth.NewHandler(authService)
+	authHandler := handler.NewHandler(authService)
 	// Група API v1 згідно зі специфікацією
 	v1 := r.Group("/api/v1")
 	{
 		authGroup := v1.Group("/auth")
-		auth.RegisterRoutes(authGroup, authHandler)
+		handler.RegisterRoutes(authGroup, authHandler)
 	}
 
+	authMiddleware := middleware.AuthMiddleware("secret-key")
+	protected := v1.Group("/protected")
+	protected.Use(authMiddleware)
+
+	protected.GET("/me", func(c *gin.Context) {
+		userID, _ := c.Get("user_id")
+
+		c.JSON(http.StatusOK, gin.H{
+			"user_id": userID,
+		})
+	})
 	// 4. Запуск сервера
 	port := ":8080"
 	fmt.Printf("Starting server on %s\n", port)

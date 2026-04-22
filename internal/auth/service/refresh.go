@@ -1,8 +1,10 @@
-package auth
+package service
 
 import (
 	"errors"
 	"time"
+
+	"github.com/PPlaner/Backend/internal/auth/utils"
 )
 
 var ErrInvalidRefreshToken = errors.New("invalid refresh token")
@@ -14,7 +16,7 @@ func (s *AuthService) Refresh(refreshToken string) (string, string, error) {
 		return "", "", ErrInvalidRefreshToken
 	}
 
-	tokenHash := HashToken(refreshToken)
+	tokenHash := utils.HashToken(refreshToken)
 
 	storedToken, err := s.refreshTokenRepo.GetByTokenHash(tokenHash)
 	if err != nil {

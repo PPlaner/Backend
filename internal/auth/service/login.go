@@ -1,7 +1,9 @@
-package auth
+package service
 
 import (
 	"errors"
+
+	"github.com/PPlaner/Backend/internal/auth/utils"
 )
 
 var ErrInvalidCredentials = errors.New("invalid credentials")
@@ -16,7 +18,7 @@ func (s *AuthService) Login(email, password string) (string, string, error) {
 		return "", "", ErrInvalidCredentials
 	}
 
-	err = CheckPasswordHash(password, user.PasswordHash)
+	err = utils.CheckPasswordHash(password, user.PasswordHash)
 	if err != nil {
 		return "", "", ErrInvalidCredentials
 	}
