@@ -22,7 +22,7 @@ type Database struct {
 
 func Load() (*Config, error) {
 	if err := godotenv.Load(".env"); err != nil {
-		return nil, fmt.Errorf("Error loading .env file", err)
+		return nil, fmt.Errorf("error loading .env file: %w", err)
 	}
 
 	host := os.Getenv("DB_HOST")

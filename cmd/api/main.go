@@ -52,6 +52,10 @@ func main() {
 	userRepo := repository.NewUserRepo(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepo(db)
 
+	syncRepo := repository.NewSyncRepository(db)
+	syncService := service.NewSyncService(syncRepo)
+	syncHandler := handler.NewSyncHandler(syncService)
+
 	authService := service.NewAuthService(
 		userRepo,
 		refreshTokenRepo,
@@ -79,6 +83,9 @@ func main() {
 			"user_id": userID,
 		})
 	})
+
+	protected.POST("/sync", syncHandler.Sync)
+
 	// 4. Запуск сервера
 	port := ":8080"
 	fmt.Printf("Starting server on %s\n", port)
