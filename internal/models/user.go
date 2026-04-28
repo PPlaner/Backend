@@ -11,4 +11,5 @@ type User struct {
 	WmkRecovery  string    `json:"wmk_recovery"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
+	SyncCursor   int       `gorm:"default:0" json:"sync_cursor"`
 }
