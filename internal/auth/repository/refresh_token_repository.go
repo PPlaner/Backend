@@ -105,3 +105,13 @@ func (r *RefreshTokenRepo) Update(token *models.RefreshToken) error {
 
 	return err
 }
+
+func (r *RefreshTokenRepo) RevokeAllByUserID(userID int) error {
+	_, err := r.db.Exec(`
+		UPDATE refresh_tokens
+		SET revoked_at = NOW()
+		WHERE user_id = $1 AND revoked_at IS NULL
+	`, userID)
+
+	return err
+}

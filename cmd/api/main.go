@@ -4,6 +4,16 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"time"
+
+	authHandler "github.com/PPlaner/Backend/internal/auth/handler"
+	authMiddleware "github.com/PPlaner/Backend/internal/auth/middleware"
+	authRepository "github.com/PPlaner/Backend/internal/auth/repository"
+	authService "github.com/PPlaner/Backend/internal/auth/service"
+
+	syncHandler "github.com/PPlaner/Backend/internal/sync/handler"
+	syncRepository "github.com/PPlaner/Backend/internal/sync/repository"
+	syncService "github.com/PPlaner/Backend/internal/sync/service"
 
 	"github.com/PPlaner/Backend/internal/config"
 	"github.com/PPlaner/Backend/internal/database"
@@ -22,14 +32,15 @@ func main() {
 	// 2. Підключення до БД
 	db, err := database.Connect(cfg.DB)
 	if err != nil {
-		fmt.Printf("Warning: Database not connected: %v\n", err)
+		panic(fmt.Sprintf("failed to connect database: %v", err))
 	}
-	defer func(db *sql.DB) {
-		err := db.Close()
-		if err != nil {
 
+	defer func(db *sql.DB) {
+		if db != nil {
+			_ = db.Close()
 		}
 	}(db)
+
 	fmt.Println("Connected to database")
 
 	// 3. Ініціалізація HTTP-сервера
@@ -43,19 +54,44 @@ func main() {
 		})
 	})
 
+	userRepo := authRepository.NewUserRepo(db)
+	refreshTokenRepo := authRepository.NewRefreshTokenRepo(db)
+
+	authSvc := authService.NewAuthService(
+		userRepo,
+		refreshTokenRepo,
+		"secret-key",
+		15*time.Minute,
+		7*24*time.Hour,
+	)
+
+	authH := authHandler.NewHandler(authSvc)
+
+	syncRepo := syncRepository.NewSyncRepository(db)
+	syncSvc := syncService.NewSyncService(syncRepo)
+	syncH := syncHandler.NewSyncHandler(syncSvc)
+
 	// Група API v1 згідно зі специфікацією
 	v1 := r.Group("/api/v1")
 	{
-		auth := v1.Group("/auth")
-		{
-			auth.POST("/register", func(c *gin.Context) {
-				c.JSON(http.StatusNotImplemented, gin.H{"error": "not implemented"})
-			})
-			auth.POST("/login", func(c *gin.Context) {
-				c.JSON(http.StatusNotImplemented, gin.H{"error": "not implemented"})
-			})
-		}
+		authGroup := v1.Group("/auth")
+		authHandler.RegisterRoutes(authGroup, authH)
 	}
+
+	mw := authMiddleware.AuthMiddleware("secret-key")
+
+	protected := v1.Group("/protected")
+	protected.Use(mw)
+
+	protected.GET("/me", func(c *gin.Context) {
+		userID, _ := c.Get("user_id")
+
+		c.JSON(http.StatusOK, gin.H{
+			"user_id": userID,
+		})
+	})
+
+	protected.POST("/sync", syncH.Sync)
 
 	// 4. Запуск сервера
 	port := ":8080"

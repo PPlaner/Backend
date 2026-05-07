@@ -26,6 +26,11 @@ func (s *AuthService) issueTokens(userID int) (string, string, error) {
 		ExpiresAt: time.Now().Add(s.refreshTokenTTL),
 	}
 
+	err = s.refreshTokenRepo.RevokeAllByUserID(userID)
+	if err != nil {
+		return "", "", err
+	}
+
 	err = s.refreshTokenRepo.Create(session)
 	if err != nil {
 		return "", "", err
