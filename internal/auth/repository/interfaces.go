@@ -12,5 +12,6 @@ type RefreshTokenRepository interface {
 	Create(token *models.RefreshToken) error
 	GetByTokenHash(hash string) (*models.RefreshToken, error)
 	RevokeByTokenHash(hash string) error
+	RevokeAllByUserID(userID int) error
 	Update(token *models.RefreshToken) error
 }

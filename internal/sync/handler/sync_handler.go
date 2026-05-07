@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/PPlaner/Backend/internal/auth/service"
 	"github.com/PPlaner/Backend/internal/dto"
+	"github.com/PPlaner/Backend/internal/sync/service"
 	"github.com/gin-gonic/gin"
 )
 
