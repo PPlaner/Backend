@@ -8,7 +8,8 @@ import (
 )
 
 type Config struct {
-	DB Database
+	DB   Database
+	SMTP SMTP
 }
 
 type Database struct {
@@ -18,6 +19,14 @@ type Database struct {
 	Password string
 	Name     string
 	SSLMode  string
+}
+
+type SMTP struct {
+	Host     string
+	Port     string
+	User     string
+	Password string
+	From     string
 }
 
 func Load() (*Config, error) {
@@ -31,6 +40,11 @@ func Load() (*Config, error) {
 	password := os.Getenv("DB_PASSWORD")
 	name := os.Getenv("DB_NAME")
 	sslMode := os.Getenv("DB_SSL_MODE")
+	smtpHost := os.Getenv("SMTP_HOST")
+	smtpPort := os.Getenv("SMTP_PORT")
+	smtpUser := os.Getenv("SMTP_USER")
+	smtpPassword := os.Getenv("SMTP_PASSWORD")
+	smtpFrom := os.Getenv("SMTP_FROM")
 
 	if host == "" || port == "" || user == "" || password == "" || name == "" {
 		return nil, fmt.Errorf("missing required database environment variables")
@@ -48,6 +62,13 @@ func Load() (*Config, error) {
 			Password: password,
 			Name:     name,
 			SSLMode:  sslMode,
+		},
+		SMTP: SMTP{
+			Host:     smtpHost,
+			Port:     smtpPort,
+			User:     smtpUser,
+			Password: smtpPassword,
+			From:     smtpFrom,
 		},
 	}
 
