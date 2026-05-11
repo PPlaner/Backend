@@ -5,11 +5,11 @@ import "time"
 type User struct {
 	ID           int       `json:"id"`
 	Email        string    `json:"email"`
-	PasswordHash string    `json:"password_hash"`
+	PasswordHash string    `json:"passwordHash"`
 	Salt         string    `json:"salt"`
-	WmkPin       string    `json:"wmk_pin"`
-	WmkRecovery  string    `json:"wmk_recovery"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-	SyncCursor   int       `gorm:"default:0" json:"sync_cursor"`
+	WmkPin       string    `json:"wmkPin"`
+	WmkRecovery  string    `json:"wmkRecovery"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
+	SyncCursor   int       `gorm:"default:0" json:"syncCursor"`
 }

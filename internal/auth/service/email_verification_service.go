@@ -66,7 +66,7 @@ func (s *EmailVerificationService) ConfirmCode(ctx context.Context, email string
 
 	codeHash := hashVerificationCode(code)
 	if verification.CodeHash != codeHash {
-		return fmt.Errorf("verification code hash does not match")
+		return fmt.Errorf("invalid verification code")
 	}
 
 	err = s.repo.MarkAsUsed(ctx, verification.ID)

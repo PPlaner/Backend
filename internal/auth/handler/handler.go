@@ -5,6 +5,7 @@ import (
 
 	"github.com/PPlaner/Backend/internal/auth/service"
 	"github.com/PPlaner/Backend/internal/dto"
+	"github.com/PPlaner/Backend/internal/response"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,30 +23,24 @@ func (h *Handler) Register(c *gin.Context) {
 	var req dto.RegisterRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.MessageResponse{
-			Message: "invalid request body",
-		})
+		response.Error(c, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
 	accessToken, refreshToken, err := h.authService.Register(req.Email, req.Password)
 	if err != nil {
 		if err == service.ErrUserAlreadyExists {
-			c.JSON(http.StatusConflict, dto.MessageResponse{
-				Message: err.Error(),
-			})
+			response.Error(c, http.StatusConflict, "user already exists")
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, dto.MessageResponse{
-			Message: "failed to register",
-		})
+		response.Error(c, http.StatusInternalServerError, "failed to register")
 		return
 	}
 
 	setRefreshCookie(c, refreshToken)
 
-	c.JSON(http.StatusCreated, dto.AuthResponse{
+	response.Success(c, http.StatusCreated, dto.AuthResponse{
 		AccessToken: accessToken,
 	})
 }
@@ -54,30 +49,24 @@ func (h *Handler) Login(c *gin.Context) {
 	var req dto.LoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.MessageResponse{
-			Message: "invalid request body",
-		})
+		response.Error(c, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
 	accessToken, refreshToken, err := h.authService.Login(req.Email, req.Password)
 	if err != nil {
 		if err == service.ErrInvalidCredentials {
-			c.JSON(http.StatusUnauthorized, dto.MessageResponse{
-				Message: err.Error(),
-			})
+			response.Error(c, http.StatusUnauthorized, err.Error())
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, dto.MessageResponse{
-			Message: "failed to login",
-		})
+		response.Error(c, http.StatusInternalServerError, "failed to login")
 		return
 	}
 
 	setRefreshCookie(c, refreshToken)
 
-	c.JSON(http.StatusOK, dto.AuthResponse{
+	response.Success(c, http.StatusOK, dto.AuthResponse{
 		AccessToken: accessToken,
 	})
 }
@@ -89,15 +78,13 @@ func (h *Handler) Refresh(c *gin.Context) {
 	if err != nil {
 		clearRefreshCookie(c)
 
-		c.JSON(http.StatusUnauthorized, dto.MessageResponse{
-			Message: err.Error(),
-		})
+		response.Error(c, http.StatusUnauthorized, "invalid refresh token")
 		return
 	}
 
 	setRefreshCookie(c, newRefreshToken)
 
-	c.JSON(http.StatusOK, dto.AuthResponse{
+	response.Success(c, http.StatusOK, dto.AuthResponse{
 		AccessToken: accessToken,
 	})
 }
@@ -109,7 +96,7 @@ func (h *Handler) Logout(c *gin.Context) {
 
 	clearRefreshCookie(c)
 
-	c.JSON(http.StatusOK, dto.MessageResponse{
+	response.Success(c, http.StatusOK, dto.MessageResponse{
 		Message: "logged out successfully",
 	})
 }

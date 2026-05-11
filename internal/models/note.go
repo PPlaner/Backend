@@ -4,12 +4,12 @@ import "time"
 
 type Note struct {
 	ID              int        `json:"id"`
-	UserID          int        `json:"user_id"`
-	ProjectID       int        `json:"project_id"`
-	EncryptedDataID int        `json:"encrypted_data_id"`
+	UserID          int        `json:"userId"`
+	ProjectID       int        `json:"projectId"`
+	EncryptedDataID int        `json:"encryptedDataId"`
 	Version         int        `json:"version"`
-	CreatedAt       time.Time  `json:"created_at"`
-	UpdatedAt       time.Time  `json:"updated_at"`
-	DeletedAt       *time.Time `json:"deleted_at,omitempty"`
-	SyncSequence    int        `json:"sync_sequence"`
+	CreatedAt       time.Time  `json:"createdAt"`
+	UpdatedAt       time.Time  `json:"updatedAt"`
+	DeletedAt       *time.Time `json:"deletedAt,omitempty"`
+	SyncSequence    int        `json:"syncSequence"`
 }
