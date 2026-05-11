@@ -4,10 +4,10 @@ import "time"
 
 type Project struct {
 	ID              int        `json:"id"`
-	UserID          int        `json:"user_id"`
-	EncryptedDataID int        `json:"encrypted_data_id"`
-	CreatedAt       time.Time  `json:"created_at"`
-	UpdatedAt       time.Time  `json:"updated_at"`
-	DeletedAt       *time.Time `json:"deleted_at"`
-	SyncSequence    int        `json:"sync_sequence"`
+	UserID          int        `json:"userId"`
+	EncryptedDataID int        `json:"encryptedDataId"`
+	CreatedAt       time.Time  `json:"createdAt"`
+	UpdatedAt       time.Time  `json:"updatedAt"`
+	DeletedAt       *time.Time `json:"deletedAt"`
+	SyncSequence    int        `json:"syncSequence"`
 }

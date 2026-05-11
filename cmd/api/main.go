@@ -17,6 +17,7 @@ import (
 
 	"github.com/PPlaner/Backend/internal/config"
 	"github.com/PPlaner/Backend/internal/database"
+	"github.com/PPlaner/Backend/internal/email"
 	"github.com/gin-gonic/gin"
 )
 
@@ -57,6 +58,10 @@ func main() {
 	userRepo := authRepository.NewUserRepo(db)
 	refreshTokenRepo := authRepository.NewRefreshTokenRepo(db)
 
+	emailVerificationRepo := authRepository.NewEmailVerificationRepository(db)
+	emailVerificationSvc := authService.NewEmailVerificationService(emailVerificationRepo)
+	emailSender := email.NewSender(cfg.SMTP)
+
 	authSvc := authService.NewAuthService(
 		userRepo,
 		refreshTokenRepo,
@@ -67,6 +72,12 @@ func main() {
 
 	authH := authHandler.NewHandler(authSvc)
 
+	emailVerificationH := authHandler.NewEmailVerificationHandler(
+		emailVerificationSvc,
+		authSvc,
+		emailSender,
+	)
+
 	syncRepo := syncRepository.NewSyncRepository(db)
 	syncSvc := syncService.NewSyncService(syncRepo)
 	syncH := syncHandler.NewSyncHandler(syncSvc)
@@ -76,6 +87,8 @@ func main() {
 	{
 		authGroup := v1.Group("/auth")
 		authHandler.RegisterRoutes(authGroup, authH)
+		authGroup.POST("/verify-email", emailVerificationH.VerifyEmail)
+		authGroup.POST("/confirm-register", emailVerificationH.ConfirmRegister)
 	}
 
 	mw := authMiddleware.AuthMiddleware("secret-key")
