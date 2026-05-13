@@ -3,10 +3,11 @@ package handler
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/PPlaner/Backend/internal/auth/service"
 	"github.com/PPlaner/Backend/internal/dto"
 	"github.com/PPlaner/Backend/internal/response"
-	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
