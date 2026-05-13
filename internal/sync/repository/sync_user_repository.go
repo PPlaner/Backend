@@ -5,15 +5,14 @@ import (
 	"database/sql"
 )
 
-func (r *SyncRepository) GetUserCursorTx(ctx context.Context, tx *sql.Tx, userID int) (int, error) {
-	var cursor int
+func (r *SyncRepository) GetUserCursorTx(ctx context.Context, tx *sql.Tx, userID int) (int64, error) {
+	var cursor int64
 
 	err := r.db.QueryRowContext(
 		ctx,
 		"SELECT sync_cursor FROM users WHERE id = $1",
 		userID,
 	).Scan(&cursor)
-
 	if err != nil {
 		return 0, err
 	}
@@ -21,12 +20,11 @@ func (r *SyncRepository) GetUserCursorTx(ctx context.Context, tx *sql.Tx, userID
 	return cursor, nil
 }
 
-func (r *SyncRepository) UpdateUserCursorTx(ctx context.Context, tx *sql.Tx, userID int, newCursor int) error {
+func (r *SyncRepository) UpdateUserCursorTx(ctx context.Context, tx *sql.Tx, userID int, newCursor int64) error {
 	_, err := r.db.ExecContext(
 		ctx,
 		"UPDATE users SET sync_cursor = $1 WHERE id = $2",
-		newCursor,
-		userID,
+		newCursor, userID,
 	)
 
 	return err
