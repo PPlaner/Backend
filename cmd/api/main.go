@@ -15,6 +15,10 @@ import (
 	syncRepository "github.com/PPlaner/Backend/internal/sync/repository"
 	syncService "github.com/PPlaner/Backend/internal/sync/service"
 
+	keyHandler "github.com/PPlaner/Backend/internal/user/handler"
+	keyRepository "github.com/PPlaner/Backend/internal/user/repository"
+	keyService "github.com/PPlaner/Backend/internal/user/service"
+
 	"github.com/PPlaner/Backend/internal/config"
 	"github.com/PPlaner/Backend/internal/database"
 	"github.com/PPlaner/Backend/internal/email"
@@ -78,6 +82,10 @@ func main() {
 		emailSender,
 	)
 
+	keyRepo := keyRepository.NewKeyRepository(db)
+	keySvc := keyService.NewKeyService(keyRepo)
+	keyH := keyHandler.NewKeyHandler(keySvc)
+
 	syncRepo := syncRepository.NewSyncRepository(db)
 	syncSvc := syncService.NewSyncService(syncRepo)
 	syncH := syncHandler.NewSyncHandler(syncSvc)
@@ -103,6 +111,10 @@ func main() {
 			"user_id": userID,
 		})
 	})
+
+	protected.GET("/me/keys", keyH.GetKeys)
+	protected.POST("/me/keys", keyH.SaveKeys)
+	protected.PATCH("/me/keys", keyH.SaveKeys)
 
 	protected.POST("/sync", syncH.Sync)
 
