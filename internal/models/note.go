@@ -1,15 +1,23 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Note struct {
-	ID              int        `json:"id"`
-	UserID          int        `json:"userId"`
-	ProjectID       int        `json:"projectId"`
-	EncryptedDataID int        `json:"encryptedDataId"`
-	Version         int        `json:"version"`
-	CreatedAt       time.Time  `json:"createdAt"`
-	UpdatedAt       time.Time  `json:"updatedAt"`
-	DeletedAt       *time.Time `json:"deletedAt,omitempty"`
-	SyncSequence    int        `json:"syncSequence"`
+	ID        uuid.UUID  `json:"id"`
+	UserID    int        `json:"userId"`
+	ProjectID *uuid.UUID `json:"projectId"`
+
+	EncryptedTitle   []byte `json:"encryptedTitle"`
+	EncryptedContent []byte `json:"encryptedContent"`
+
+	Version      int   `json:"version"`
+	SyncSequence int64 `json:"syncSequence"`
+
+	CreatedAt time.Time  `json:"createdAt"`
+	UpdatedAt time.Time  `json:"updatedAt"`
+	DeletedAt *time.Time `json:"deletedAt,omitempty"`
 }
