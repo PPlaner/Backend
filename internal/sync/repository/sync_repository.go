@@ -17,9 +17,9 @@ func NewSyncRepository(db *sql.DB) *SyncRepository {
 	}
 }
 
-//--------------------------------------------
+// --------------------------------------------------------
 // ---------------------- Транзакція ----------------------
-//--------------------------------------------
+// --------------------------------------------------------
 
 func (r *SyncRepository) SyncData(ctx context.Context, userID int, req dto.SyncRequest) (dto.SyncResponse, error) {
 	tx, err := r.db.BeginTx(ctx, nil)
@@ -85,5 +85,4 @@ func (r *SyncRepository) SyncData(ctx context.Context, userID int, req dto.SyncR
 		return dto.SyncResponse{}, err
 	}
 	return response, nil
-	
 }

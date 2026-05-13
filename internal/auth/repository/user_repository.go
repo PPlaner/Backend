@@ -16,45 +16,25 @@ func NewUserRepo(db *sql.DB) *UserRepo {
 
 func (r *UserRepo) Create(user *models.User) error {
 	query := `
-		INSERT INTO users (
-			email,
-			password_hash,
-			salt,
-			wmk_pin,
-			wmk_recovery,
-			created_at,
-			updated_at
-		)
-		VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+		INSERT INTO users (email, password_hash, created_at, updated_at)
+		VALUES ($1, $2, NOW(), NOW())
 		RETURNING id, created_at, updated_at
 	`
-
 	return r.db.QueryRow(
 		query,
 		user.Email,
 		user.PasswordHash,
-		user.Salt,
-		user.WmkPin,
-		user.WmkRecovery,
 	).Scan(
 		&user.ID,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
 }
+
 func (r *UserRepo) GetByEmail(email string) (*models.User, error) {
 	query := `
-		SELECT 
-			id,
-			email,
-			password_hash,
-			salt,
-			wmk_pin,
-			wmk_recovery,
-			created_at,
-			updated_at
-		FROM users
-		WHERE email = $1
+	    SELECT id, email, password_hash, created_at, updated_at, sync_cursor
+		FROM users WHERE email = $1
 	`
 
 	var user models.User
@@ -63,11 +43,9 @@ func (r *UserRepo) GetByEmail(email string) (*models.User, error) {
 		&user.ID,
 		&user.Email,
 		&user.PasswordHash,
-		&user.Salt,
-		&user.WmkPin,
-		&user.WmkRecovery,
 		&user.CreatedAt,
 		&user.UpdatedAt,
+		&user.SyncCursor,
 	)
 
 	if err == sql.ErrNoRows {
@@ -79,19 +57,11 @@ func (r *UserRepo) GetByEmail(email string) (*models.User, error) {
 
 	return &user, nil
 }
+
 func (r *UserRepo) GetByID(id int) (*models.User, error) {
 	query := `
-		SELECT 
-			id,
-			email,
-			password_hash,
-			salt,
-			wmk_pin,
-			wmk_recovery,
-			created_at,
-			updated_at
-		FROM users
-		WHERE id = $1
+	    SELECT id, email, password_hash, created_at, updated_at, sync_cursor
+		FROM users WHERE id = $1
 	`
 
 	var user models.User
@@ -100,11 +70,9 @@ func (r *UserRepo) GetByID(id int) (*models.User, error) {
 		&user.ID,
 		&user.Email,
 		&user.PasswordHash,
-		&user.Salt,
-		&user.WmkPin,
-		&user.WmkRecovery,
 		&user.CreatedAt,
 		&user.UpdatedAt,
+		&user.SyncCursor,
 	)
 
 	if err == sql.ErrNoRows {
